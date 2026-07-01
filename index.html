@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>怪物猎人荒野 · 全功能工具箱</title>
+<title>怪物猎人荒野-抽取工具箱</title>
 <style>
 /* ===== 共享变量 & 基础 ===== */
 :root {
@@ -180,7 +180,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 </head>
 <body>
 <div class="wrap">
-  <header><h1>怪物猎人荒野 · 全功能工具箱</h1></header>
+  <header><h1>怪物猎人荒野-抽取工具箱</h1></header>
 
   <!-- Tab 导航 -->
   <nav class="tab-nav">
@@ -546,7 +546,7 @@ $$(".tab-btn").forEach(btn => {
 
   function renderHeroSlots() {
     const hc = ["slot-rey","slot-uth","slot-nu","slot-ark"];
-    heroSlots.innerHTML = [1,2,3,4].map(n => `<div class="hero-slot ${hc[n-1]}" data-slot="${n}"><span class="h-placeholder">等待抽奖</span></div>`).join("");
+    heroSlots.innerHTML = [1,2,3,4].map(n => `<div class="hero-slot ${hc[n-1]}" data-slot="${n}"><span class="h-placeholder">待抽取</span></div>`).join("");
   }
 
   function weaponIconHtml(w, cls="h-icon") {
@@ -566,7 +566,7 @@ $$(".tab-btn").forEach(btn => {
     if (pool.length===0) { showToast("请至少勾选一把武器！"); return; }
     if (pool.length<4) { showToast("至少需要勾选 4 把武器！"); return; }
     hisDrawing = true; document.getElementById("btnHeroDraw").disabled = true;
-    document.querySelectorAll("#tab-hero .hero-slot").forEach(s => { s.classList.remove("revealed","spinning"); s.innerHTML='<span class="h-placeholder">等待抽奖</span>'; });
+    document.querySelectorAll("#tab-hero .hero-slot").forEach(s => { s.classList.remove("revealed","spinning"); s.innerHTML='<span class="h-placeholder">待抽取</span>'; });
     const draws = computeDraws(pool, mode), slots = $$("#tab-hero .hero-slot");
     for (let i=0;i<4;i++) {
       const slot = slots[i]; slot.classList.add("spinning");
