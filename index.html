@@ -614,7 +614,7 @@ $$(".tab-btn").forEach(btn => {
 
   function renderDWP() {
     dwPool.innerHTML = WEAPONS_DATA.map(w => `
-      <div class="pool-item"><input type="checkbox" id="dw-${w.id}" value="${w.id}" checked><label for="dw-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="p-name">${w.name}</span><span class="check-mark">✓</span></label></div>
+      <div class="pool-item"><input type="checkbox" id="dw-${w.id}" value="${w.id}" checked><label for="dw-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
     `).join("");
     dwPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateDWCount));
     updateDWCount();
