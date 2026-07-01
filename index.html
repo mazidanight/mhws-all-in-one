@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>怪物猎人荒野 · 全功能工具箱</title>
+<style>
+/* ===== 共享变量 & 基础 ===== */
+:root {
+  --bg-deep: #0f1410; --bg-panel: #1a2218; --bg-card: #243028;
+  --border: #3d5240; --accent: #c9a227; --accent-glow: rgba(201,162,39,0.45);
+  --text: #e8ebe4; --text-muted: #9aab96; --danger: #b85c4a;
+  --tempered-color: #a855f7; --tempered-glow: rgba(168,85,247,0.45);
+  --at-color: #e85d3f; --at-glow: rgba(232,93,63,0.5);
+  --wheel-bg: #1c241a;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background: var(--bg-deep);
+  background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(90,120,70,0.25), transparent), radial-gradient(ellipse 60% 40% at 100% 100%, rgba(201,162,39,0.08), transparent);
+  color: var(--text); min-height: 100vh; line-height: 1.5;
+}
+.wrap { max-width: 960px; margin: 0 auto; padding: 1rem 1rem 2.5rem; }
+header { text-align: center; margin-bottom: 1rem; }
+header h1 { font-size: clamp(1.1rem,3.5vw,1.5rem); font-weight: 700; letter-spacing: 0.05em; color: var(--accent); text-shadow: 0 0 20px var(--accent-glow); }
+
+/* ===== Tab 导航 ===== */
+.tab-nav {
+  display: flex; gap: 2px; margin-bottom: 1rem;
+  background: var(--bg-card); border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.tab-btn {
+  flex: 1; padding: 0.55rem 0.35rem; font-size: 0.75rem; font-weight: 600;
+  border: none; background: var(--bg-card); color: var(--text-muted);
+  cursor: pointer; transition: all 0.2s; text-align: center;
+  border-bottom: 2px solid transparent;
+}
+.tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.tab-btn.active { color: var(--accent); background: var(--bg-panel); border-bottom-color: var(--accent); }
+.tab-btn .tb-icon { display: block; font-size: 1.1rem; margin-bottom: 1px; }
+@media (max-width:480px) { .tab-btn { font-size: 0.65rem; padding: 0.45rem 0.15rem; } .tab-btn .tb-icon { font-size: 0.9rem; } }
+
+/* ===== Tab 面板 ===== */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ===== 共享组件 ===== */
+section { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 1rem; }
+section h2 { font-size: 0.95rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+section h2::before { content:""; width:4px; height:1em; background:var(--accent); border-radius:2px; }
+.pool-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+.pool-toolbar button { font-size: 0.8rem; padding: 0.35rem 0.75rem; border:1px solid var(--border); background:var(--bg-card); color:var(--text-muted); border-radius:6px; cursor:pointer; transition: color 0.2s, border-color 0.2s; }
+.pool-toolbar button:hover { color:var(--accent); border-color:var(--accent); }
+.pool-count { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; }
+.pool-count em { font-style: normal; color: var(--accent); font-weight: 600; }
+.btn-gold { padding: 0.75rem 2rem; font-size: 1rem; font-weight: 600; letter-spacing: 0.08em; color: var(--bg-deep); background: linear-gradient(180deg,#e0c04a 0%,var(--accent) 50%,#9a7a18 100%); border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 16px var(--accent-glow); transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s; }
+.btn-gold:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px var(--accent-glow); }
+.btn-gold:disabled { opacity: 0.5; cursor: not-allowed; }
+.toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--danger); color: #fff; padding: 0.65rem 1.2rem; border-radius: 8px; font-size: 0.9rem; opacity: 0; pointer-events: none; transition: transform 0.3s, opacity 0.3s; z-index: 100; max-width: 90vw; text-align: center; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted); }
+.group-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin: 0.6rem 0 0.35rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
+
+/* =====【Tab1】武器转盘 ===== */
+.wheel-stage { position: relative; width: min(340px,85vw); height: min(340px,85vw); margin: 0 auto 0.5rem; }
+.wheel-pointer { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 22px solid var(--accent); filter: drop-shadow(0 0 6px var(--accent-glow)); z-index: 20; }
+.wheel-pointer::after { content:""; position: absolute; top: -28px; left: -6px; width: 12px; height: 8px; background: var(--accent); border-radius: 3px 3px 0 0; }
+.wheel-outer { width: 100%; height: 100%; border-radius: 50%; padding: 12px; background: radial-gradient(circle,var(--border) 60%,#2a352c 100%); box-shadow: 0 0 30px rgba(0,0,0,0.5), 0 0 60px var(--accent-glow); }
+.wheel-inner { width: 100%; height: 100%; border-radius: 50%; background: var(--wheel-bg); position: relative; overflow: hidden; }
+.wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; transition: transform 4.5s cubic-bezier(0.12,0.8,0.3,1); }
+.wheel-layer { position: absolute; inset: 0; border-radius: 50%; }
+.wheel-slot { position: absolute; inset: 0; display: flex; justify-content: center; }
+.wheel-slot .w-icon { width: 44px; height: 44px; margin-top: 18px; display: flex; align-items: center; justify-content: center; }
+.wheel-slot .w-icon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6)); }
+.wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 40% 35%,#e0c04a,var(--accent) 50%,#7a5c10); box-shadow: 0 4px 16px var(--accent-glow),inset 0 1px 2px rgba(255,255,255,0.3); z-index: 15; cursor: pointer; border: 2px solid #9a7a18; }
+.wheel-center:hover { transform: translate(-50%,-50%) scale(1.08); }
+.wheel-center::after { content:"GO"; font-size: 1.2rem; font-weight: 800; letter-spacing: 0.08em; color: #2a1a00; text-shadow: 0 1px 0 rgba(255,255,255,0.3); }
+.wheel-result { text-align: center; margin: 0.5rem 0; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
+.wheel-result .wr-icon { width: 48px; height: 48px; animation: popIn 0.4s ease-out; }
+.wheel-result .wr-icon img { width: 100%; height: 100%; object-fit: contain; }
+.wheel-result .wr-text { font-size: 1.1rem; font-weight: 600; color: var(--accent); animation: fadeIn 0.4s ease-out; }
+.wheel-result .wr-name { font-size: 1.4rem; text-shadow: 0 0 12px var(--accent-glow); }
+@keyframes popIn { 0%{transform:scale(0.3);opacity:0;} 60%{transform:scale(1.1);} 100%{transform:scale(1);opacity:1;} }
+@keyframes fadeIn { 0%{opacity:0;transform:translateY(8px);} 100%{opacity:1;transform:translateY(0);} }
+.wheel-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(72px,1fr)); gap:0.6rem; }
+.wheel-item { position: relative; }
+.wheel-item input { position: absolute; opacity: 0; width: 0; height: 0; }
+.wheel-item label { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; padding: 0.5rem 0.35rem; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+.wheel-item label:hover { border-color: #5a7358; }
+.wheel-item input:checked + label { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+.wheel-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+.wheel-icon img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.wheel-item .check-mark { width: 14px; height: 14px; border: 2px solid var(--text-muted); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: transparent; transition: all 0.2s; }
+.wheel-item input:checked + label .check-mark { border-color: var(--accent); background: var(--accent); color: var(--bg-deep); }
+@media (max-width:520px) { .wheel-grid { grid-template-columns: repeat(auto-fill,minmax(60px,1fr)); } .wheel-slot .w-icon { width: 32px; height: 32px; margin-top: 14px; } .wheel-center { width: 48px; height: 48px; } }
+
+/* =====【Tab2】怪物抽取 ===== */
+.draw-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
+.draw-result { min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+.draw-result .dr-icon { width: 96px; height: 96px; animation: popIn 0.5s ease-out; }
+.draw-result .dr-icon img { width: 100%; height: 100%; object-fit: contain; }
+.draw-result .dr-name { font-size: 1.6rem; font-weight: 700; animation: fadeUp 0.4s ease-out; }
+.draw-result .dr-name.tempered-glow { color: var(--tempered-color); text-shadow: 0 0 16px var(--tempered-glow); }
+.draw-result .dr-name.at-glow { color: var(--at-color); text-shadow: 0 0 16px var(--at-glow); }
+.draw-result .dr-icon.tempered-glow { filter: drop-shadow(0 0 10px var(--tempered-glow)) drop-shadow(0 0 20px var(--tempered-glow)); }
+.draw-result .dr-icon.at-glow { filter: drop-shadow(0 0 10px var(--at-glow)) drop-shadow(0 0 20px var(--at-glow)); }
+.draw-result .dr-type { font-size: 0.9rem; color: var(--text-muted); animation: fadeUp 0.4s ease-out 0.1s both; }
+@keyframes fadeUp { 0%{opacity:0;transform:translateY(12px);} 100%{opacity:1;transform:translateY(0);} }
+.monster-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(84px,1fr)); gap: 0.5rem; }
+.monster-card { position: relative; }
+.monster-card input { position: absolute; opacity: 0; width: 0; height: 0; }
+.monster-card label { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.5rem 0.25rem; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.68rem; text-align: center; height: 110px; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; }
+.monster-card label:hover { border-color: #5a7358; }
+.monster-card input:checked + label { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+.monster-card input:checked + label.tempered-label { border-color: var(--tempered-color); box-shadow: 0 0 14px var(--tempered-glow); }
+.monster-card input:checked + label.at-label { border-color: var(--at-color); box-shadow: 0 0 14px var(--at-glow); }
+.monster-card .m-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.monster-card .m-icon img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.monster-card .m-name { color: var(--text); line-height: 1.2; font-size: 0.68rem; word-break: keep-all; }
+.monster-card .check-mark { width: 12px; height: 12px; border: 2px solid var(--text-muted); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: transparent; transition: all 0.2s; }
+.monster-card input:checked + label .check-mark { border-color: var(--accent); background: var(--accent); color: var(--bg-deep); }
+.monster-card input:checked + label.tempered-label .check-mark { border-color: var(--tempered-color); background: var(--tempered-color); }
+.monster-card input:checked + label.at-label .check-mark { border-color: var(--at-color); background: var(--at-color); }
+@media (max-width:520px) { .monster-grid { grid-template-columns: repeat(auto-fill,minmax(70px,1fr)); } }
+
+/* =====【Tab3】英雄之证 ===== */
+.hero-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.6rem; }
+@media (max-width:520px) { .hero-grid { grid-template-columns: repeat(2,1fr); } }
+.hero-slot { border: 2px solid var(--border); border-radius: 10px; padding: 0.75rem 0.5rem; text-align: center; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-card); position: relative; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
+.hero-slot::before { content:""; position: absolute; inset: 0; background-size: 80px 80px; background-repeat: no-repeat; background-position: center; opacity: 0.4; filter: drop-shadow(0 0 8px var(--at-glow)); z-index: 0; transition: opacity 0.3s; }
+.hero-slot.slot-rey::before { background-image: url("icons/bg_rey_dau.png"); }
+.hero-slot.slot-uth::before { background-image: url("icons/bg_uth_duna.png"); }
+.hero-slot.slot-nu::before  { background-image: url("icons/bg_nu_udra.png"); }
+.hero-slot.slot-ark::before { background-image: url("icons/bg_arkveld.png"); }
+.hero-slot.revealed { border-color: var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
+.hero-slot.revealed::before { opacity: 0.5; }
+.hero-slot > * { position: relative; z-index: 1; }
+.hero-slot .h-icon { width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
+.hero-slot .h-icon img { width: 100%; height: 100%; object-fit: contain; }
+.hero-slot.revealed .h-icon { animation: popIn 0.45s ease-out; }
+.hero-slot .h-placeholder { font-size: 0.8rem; color: var(--text-muted); }
+.hero-slot.spinning .h-icon { animation: hPulse 0.4s ease-in-out infinite; }
+@keyframes hPulse { 0%,100%{opacity:0.4;transform:scale(0.92);} 50%{opacity:1;transform:scale(1.05);} }
+.hero-grid-w { display: grid; grid-template-columns: repeat(auto-fill,minmax(72px,1fr)); gap: 0.6rem; }
+@media (max-width:520px) { .hero-grid-w { grid-template-columns: repeat(auto-fill,minmax(60px,1fr)); } }
+
+/* =====【Tab4】双重抽取 ===== */
+.dual-result { min-height: 180px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
+.dual-card { position: relative; width: 200px; height: 200px; border: 2px solid var(--border); border-radius: 16px; background: var(--bg-card); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.dual-card .monster-bg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.4; z-index: 0; }
+.dual-card .monster-bg img { width: 140px; height: 140px; object-fit: contain; }
+.dual-card .monster-bg.at-glow { filter: drop-shadow(0 0 12px var(--at-glow)); }
+.dual-card .monster-bg.tempered-glow { filter: drop-shadow(0 0 12px var(--tempered-glow)); }
+.dual-card .weapon-top { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; animation: popIn 0.5s ease-out; }
+.dual-card .weapon-top img { width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+.dual-card .weapon-top .w-name { font-size: 1.2rem; font-weight: 700; color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
+.dual-card .monster-name { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; z-index: 2; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+.dual-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(72px,1fr)); gap: 0.5rem; }
+
+/* ===== 历史记录（共用） ===== */
+.history-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 40px; }
+.history-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.75rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; animation: histIn 0.3s ease-out; }
+.history-item.at-history { border-color: rgba(232,93,63,0.3); box-shadow: 0 0 8px rgba(232,93,63,0.15); }
+.history-item.tempered-history { border-color: rgba(168,85,247,0.3); box-shadow: 0 0 8px rgba(168,85,247,0.15); }
+@keyframes histIn { 0%{opacity:0;transform:translateX(-20px);} 100%{opacity:1;transform:translateX(0);} }
+.history-item .h-no { color: var(--text-muted); font-size: 0.75rem; }
+.history-item .h-icons { display: flex; gap: 2px; align-items: center; flex-shrink: 0; }
+.history-item .h-icons img { width: 28px; height: 28px; object-fit: contain; }
+.history-item .h-info { flex: 1; font-size: 0.78rem; }
+.history-item .h-info .h-wname { font-weight: 600; color: var(--accent); }
+.history-item .h-info .h-mname { color: var(--text-muted); }
+.history-item .h-time { font-size: 0.72rem; color: var(--text-muted); }
+.history-empty { color: var(--text-muted); font-size: 0.85rem; text-align: center; padding: 1rem 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>怪物猎人荒野 · 全功能工具箱</h1></header>
+
+  <!-- Tab 导航 -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="wheel">🎡<span class="tb-icon"></span>武器转盘</button>
+    <button class="tab-btn" data-tab="monster">🐉<span class="tb-icon"></span>怪物抽取</button>
+    <button class="tab-btn" data-tab="hero">⚔️<span class="tb-icon"></span>英雄之证</button>
+    <button class="tab-btn" data-tab="dual">🎲<span class="tb-icon"></span>双重抽取</button>
+  </nav>
+
+  <!-- ===== Tab1: 武器转盘 ===== -->
+  <div class="tab-panel active" id="tab-wheel">
+    <section style="display:flex;flex-direction:column;align-items:center;">
+      <div class="wheel-stage" id="wheelStage">
+        <div class="wheel-pointer"></div>
+        <div class="wheel-outer"><div class="wheel-inner"><div class="wheel" id="wheel"><div class="wheel-layer" id="wheelLayer"></div></div></div></div>
+        <div class="wheel-center" id="wheelCenter"></div>
+      </div>
+      <div class="wheel-result" id="wheelResult"><span style="color:var(--text-muted);">点击转盘或下方按钮开始</span></div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0.75rem;margin-top:0.5rem;">
+        <button class="btn-gold" id="btnWheelSpin">开始旋转</button>
+        <span class="pool-count" id="wheelCount">已选 <em>14</em> / 14 把武器</span>
+      </div>
+    </section>
+    <section>
+      <h2>武器池</h2>
+      <div class="pool-toolbar">
+        <button id="btnWAll">全选</button><button id="btnWNone">全不选</button><button id="btnWInv">反选</button>
+      </div>
+      <div class="wheel-grid" id="wheelPool"></div>
+    </section>
+    <section><h2>历史记录</h2><div class="history-list" id="wheelHistory"><div class="history-empty">暂无记录</div></div></section>
+  </div>
+
+  <!-- ===== Tab2: 怪物抽取 ===== -->
+  <div class="tab-panel" id="tab-monster">
+    <section class="draw-card">
+      <div class="draw-result" id="monsterResult"><span style="color:var(--text-muted);">点击下方按钮开始抽选</span></div>
+      <button class="btn-gold" id="btnMonsterDraw">开始抽选</button>
+      <div class="pool-count" style="margin-top:0.75rem;" id="monsterCount">已选 <em>39</em> / 39 只怪物</div>
+    </section>
+    <section>
+      <h2>怪物池</h2>
+      <div class="pool-toolbar">
+        <button id="btnMAll">全选</button><button id="btnMNone">全不选</button><button id="btnMInv">反选</button>
+      </div>
+      <div id="monsterPool"></div>
+    </section>
+    <section><h2>历史记录</h2><div class="history-list" id="monsterHistory"><div class="history-empty">暂无记录</div></div></section>
+  </div>
+
+  <!-- ===== Tab3: 英雄之证 ===== -->
+  <div class="tab-panel" id="tab-hero">
+    <section>
+      <div class="hero-grid" id="heroSlots"></div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0.75rem;margin-top:0.75rem;">
+        <button class="btn-gold" id="btnHeroDraw">开始抽取</button>
+        <span class="pool-count" id="heroCount">已选 <em>14</em> / 14 把武器</span>
+      </div>
+    </section>
+    <section>
+      <h2>武器池</h2>
+      <div class="pool-toolbar">
+        <button id="btnHAll">全选</button><button id="btnHNone">全不选</button><button id="btnHInv">反选</button>
+      </div>
+      <div class="hero-grid-w" id="heroPool"></div>
+    </section>
+    <section><h2>历史记录</h2><div class="history-list" id="heroHistory"><div class="history-empty">暂无记录</div></div></section>
+  </div>
+
+  <!-- ===== Tab4: 双重抽取 ===== -->
+  <div class="tab-panel" id="tab-dual">
+    <section class="draw-card">
+      <div class="dual-result" id="dualResult"><span class="result-placeholder" style="color:var(--text-muted);">点击下方按钮开始抽选</span></div>
+      <button class="btn-gold" id="btnDualDraw">开始双重抽选</button>
+    </section>
+    <section><h2>武器池</h2>
+      <div class="pool-toolbar">
+        <button id="btnDWAll">全选</button><button id="btnDWNone">全不选</button><button id="btnDWInv">反选</button>
+      </div>
+      <div class="dual-grid" id="dualWPool"></div>
+      <div class="pool-count" id="dualWCount">已选 <em>14</em> / 14 把武器</div>
+    </section>
+    <section><h2>怪物池</h2>
+      <div class="pool-toolbar">
+        <button id="btnDMAll">全选</button><button id="btnDMNone">全不选</button><button id="btnDMInv">反选</button>
+      </div>
+      <div id="dualMPool"></div>
+      <div class="pool-count" id="dualMCount">已选 <em>39</em> / 39 只怪物</div>
+    </section>
+    <section><h2>历史记录</h2><div class="history-list" id="dualHistory"><div class="history-empty">暂无记录</div></div></section>
+  </div>
+
+  <footer>武器图标 & 怪物图标为游戏 UI 原版素材 · 仅供个人娱乐使用</footer>
+</div>
+<div class="toast" id="toast" role="alert"></div>
+
+<script>
+// ===== 全局工具 =====
+const $ = (s, p) => (p||document).querySelector(s);
+const $$ = (s, p) => [...(p||document).querySelectorAll(s)];
+const toastEl = document.getElementById("toast");
+function showToast(msg) {
+  toastEl.textContent = msg; toastEl.classList.add("show");
+  clearTimeout(showToast._t); showToast._t = setTimeout(() => toastEl.classList.remove("show"), 2800);
+}
+function formatTime(date) {
+  const diff = Math.floor((new Date() - date) / 1000);
+  if (diff < 10) return "刚刚"; if (diff < 60) return `${diff}秒前`;
+  if (diff < 3600) return `${Math.floor(diff/60)}分钟前`; if (diff < 86400) return `${Math.floor(diff/3600)}小时前`;
+  return `${Math.floor(diff/86400)}天前`;
+}
+const ICON_W = "icons", ICON_M = "monsters";
+
+// ===== 数据 =====
+const WEAPONS_DATA = [
+  { id:"gs",name:"大剑"},{ id:"ls",name:"太刀"},{ id:"sns",name:"片手剑"},{ id:"db",name:"双刀"},
+  { id:"hammer",name:"大锤"},{ id:"horn",name:"狩猎笛"},{ id:"lance",name:"长枪"},{ id:"gl",name:"铳枪"},
+  { id:"sa",name:"斩击斧"},{ id:"cb",name:"充能斧"},{ id:"ig",name:"操虫棍"},{ id:"lbg",name:"轻弩"},
+  { id:"hbg",name:"重弩"},{ id:"bow",name:"弓"}
+];
+const MONSTERS_DATA = [
+  { id:"chatacabra",name_zh:"缠蛙",type_zh:"两栖种",group:"base"},
+  { id:"quematrice",name_zh:"炎尾龙",type_zh:"兽龙种",group:"base"},
+  { id:"lala_barina",name_zh:"刺花蜘蛛",type_zh:"铗角种",group:"base"},
+  { id:"congalala",name_zh:"桃毛兽王",type_zh:"牙兽种",group:"base"},
+  { id:"balahara",name_zh:"沙海龙",type_zh:"海龙种",group:"base"},
+  { id:"doshaguma",name_zh:"辟兽",type_zh:"牙兽种",group:"base"},
+  { id:"uth_duna",name_zh:"波衣龙",type_zh:"海龙种",group:"base"},
+  { id:"rompopolo",name_zh:"沼喷龙",type_zh:"兽龙种",group:"base"},
+  { id:"rey_dau",name_zh:"煌雷龙",type_zh:"飞龙种",group:"base"},
+  { id:"nerscylla",name_zh:"影蜘蛛",type_zh:"铗角种",group:"base"},
+  { id:"hirabami",name_zh:"风铗龙",type_zh:"海龙种",group:"base"},
+  { id:"ajarakan",name_zh:"赫猿兽",type_zh:"牙兽种",group:"base"},
+  { id:"nu_udra",name_zh:"狱焰蛸",type_zh:"头足种",group:"base"},
+  { id:"guardian_doshaguma",name_zh:"护辟兽",type_zh:"护龙种",group:"base"},
+  { id:"guardian_rathalos",name_zh:"护火龙",type_zh:"护龙种",group:"base"},
+  { id:"jin_dahaad",name_zh:"冻峰龙",type_zh:"海龙种",group:"base"},
+  { id:"guardian_ebony_odogaron",name_zh:"护凶爪龙",type_zh:"护龙种",group:"base"},
+  { id:"xu_wu",name_zh:"暗器蛸",type_zh:"头足种",group:"base"},
+  { id:"guardian_arkveld",name_zh:"护锁刃龙",type_zh:"护龙种",group:"base"},
+  { id:"zoh_shia",name_zh:"白炽龙",type_zh:"护龙种",group:"base"},
+  { id:"yian_kut_ku",name_zh:"怪鸟",type_zh:"鸟龙种",group:"base"},
+  { id:"gypceros",name_zh:"毒怪鸟",type_zh:"鸟龙种",group:"base"},
+  { id:"rathian",name_zh:"雌火龙",type_zh:"飞龙种",group:"base"},
+  { id:"guardian_fulgur_anjanath",name_zh:"护雷颚龙",type_zh:"护龙种",group:"base"},
+  { id:"rathalos",name_zh:"火龙",type_zh:"飞龙种",group:"base"},
+  { id:"gravios",name_zh:"铠龙",type_zh:"飞龙种",group:"base"},
+  { id:"blangonga",name_zh:"雪狮子王",type_zh:"牙兽种",group:"base"},
+  { id:"gore_magala",name_zh:"黑蚀龙",type_zh:"半古龙种",group:"base"},
+  { id:"arkveld",name_zh:"锁刃龙",type_zh:"飞龙种",group:"base"},
+  { id:"mizutsune",name_zh:"泡狐龙",type_zh:"海龙种",group:"dlc"},
+  { id:"seregios",name_zh:"千刃龙",type_zh:"飞龙种",group:"dlc"},
+  { id:"lagiacrus",name_zh:"海龙",type_zh:"海龙种",group:"dlc"},
+  { id:"omega_planetes",name_zh:"零式欧米茄",type_zh:"联动",group:"dlc"},
+  { id:"gogmazios",name_zh:"巨戟龙",type_zh:"古龙种",group:"dlc"},
+  { id:"rey_dau（历战王）",name_zh:"历战王煌雷龙",type_zh:"历战王",group:"at"},
+  { id:"uth_duna（历战王）",name_zh:"历战王波衣龙",type_zh:"历战王",group:"at"},
+  { id:"nu_udra（历战王）",name_zh:"历战王狱焰蛸",type_zh:"历战王",group:"at"},
+  { id:"jin_dahaad（历战王）",name_zh:"历战王冻峰龙",type_zh:"历战王",group:"at"},
+  { id:"arkveld（历战王）",name_zh:"历战王锁刃龙",type_zh:"历战王",group:"at"}
+];
+
+// 怪物显示名 & 样式
+function mDisplay(m) {
+  if (m.group === "at") return m.name_zh.replace(/^历战王/,"") + "（历战王）";
+  if (m.id === "gogmazios" || m.id === "omega_planetes") return m.name_zh;
+  return m.name_zh + "（历战）";
+}
+function mGlow(m) {
+  if (m.group === "at") return "at-glow";
+  if (m.id === "gogmazios") return "";
+  return "tempered-glow";
+}
+function mLabel(m) {
+  if (m.group === "at") return "at-label";
+  if (m.id === "gogmazios") return "";
+  return "tempered-label";
+}
+
+// ===== Tab 切换 =====
+$$(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    $$(".tab-btn").forEach(b => b.classList.remove("active"));
+    $$(".tab-panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+  });
+});
+
+// ===== Tab1: 武器转盘 =====
+(function(){
+  const wheelEl = document.getElementById("wheel"), wheelLayer = document.getElementById("wheelLayer");
+  const wheelResult = document.getElementById("wheelResult"), wheelPool = document.getElementById("wheelPool");
+  const wheelCount = document.getElementById("wheelCount");
+  let currentRotation = 0, isSpinning = false, whistory = [], whSeq = 0;
+
+  function getWSelected() {
+    const ids = [...wheelPool.querySelectorAll("input:checked")].map(e=>e.value);
+    return WEAPONS_DATA.filter(w => ids.includes(w.id));
+  }
+  function updateWCount() {
+    wheelCount.innerHTML = `已选 <em>${getWSelected().length}</em> / ${WEAPONS_DATA.length} 把武器`;
+  }
+
+  function buildWheel() {
+    const weapons = getWSelected(); const count = weapons.length; const segAngle = 360/count;
+    if (count === 0) { wheelEl.style.background = "var(--bg-card)"; wheelLayer.innerHTML = ""; return; }
+    const stops = [];
+    for (let i = 0; i < count; i++) {
+      const c = i%2===0 ? "var(--bg-card)" : "var(--bg-panel)";
+      const s = i*360/count, e = (i===count-1)?360:(i+1)*360/count;
+      stops.push(`${c} ${s.toFixed(4)}deg ${e.toFixed(4)}deg`);
+    }
+    wheelEl.style.background = `conic-gradient(${stops.join(",")})`;
+    currentRotation = 0; wheelEl.style.transition = "none"; wheelEl.style.transform = "rotate(0deg)";
+    wheelLayer.innerHTML = weapons.map((w,i) => {
+      const a = (i+0.5)*segAngle;
+      return `<div class="wheel-slot" style="transform:rotate(${a}deg);"><div class="w-icon" style="transform:rotate(${-a}deg);"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="44" height="44" loading="lazy"></div></div>`;
+    }).join("");
+  }
+
+  function renderWPool() {
+    wheelPool.innerHTML = WEAPONS_DATA.map(w => `
+      <div class="wheel-item"><input type="checkbox" id="ww-${w.id}" value="${w.id}" checked><label for="ww-${w.id}"><div class="wheel-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
+    `).join("");
+    wheelPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", () => { if(!isSpinning) { currentRotation=0; wheelEl.style.transition="none"; wheelEl.style.transform="rotate(0deg)"; buildWheel(); updateWCount(); } }));
+    updateWCount();
+  }
+
+  function getWIdx() { const c=getWSelected().length, s=360/c, n=((currentRotation%360)+360)%360; return Math.floor(((360-n+360)%360)/s)%c; }
+
+  async function spinWheel() {
+    if (isSpinning) return; const weapons = getWSelected();
+    if (weapons.length === 0) { showToast("请至少勾选一把武器！"); return; }
+    isSpinning = true; document.getElementById("btnWheelSpin").disabled = true; document.getElementById("wheelCenter").style.pointerEvents = "none";
+    wheelResult.innerHTML = '<span style="color:var(--text-muted);">旋转中...</span>';
+    const segAngle = 360/weapons.length, targetIndex = Math.floor(Math.random()*weapons.length);
+    const segCenter = (targetIndex+0.5)*segAngle, targetNorm = (360-segCenter)%360;
+    const targetRotation = targetNorm + (4+Math.floor(Math.random()*5))*360;
+    const ts = "transform 4.5s cubic-bezier(0.12,0.8,0.3,1)";
+    wheelEl.style.transition = ts;
+    wheelLayer.querySelectorAll(".w-icon").forEach((wrap,i) => {
+      const a = (i+0.5)*segAngle; wrap.style.transition = ts; wrap.style.transform = `rotate(${-a-targetRotation}deg)`;
+    });
+    currentRotation = targetRotation; wheelEl.style.transform = `rotate(${currentRotation}deg)`;
+    await new Promise(r => { wheelEl.addEventListener("transitionend", r, {once:true}); });
+    const winner = weapons[targetIndex];
+    wheelResult.innerHTML = `<div class="wr-icon"><img src="${ICON_W}/${winner.id}.png" alt="${winner.name}" width="48" height="48"></div><div class="wr-text"><span style="color:var(--text-muted);">抽选结果  </span><span class="wr-name">${winner.name}</span></div>`;
+    whSeq++; whistory.unshift({ draws:[winner], time:new Date(), seq:whSeq }); if (whistory.length>10) whistory.pop();
+    renderWHistory(); isSpinning = false; document.getElementById("btnWheelSpin").disabled = false; document.getElementById("wheelCenter").style.pointerEvents = "auto";
+  }
+
+  function renderWHistory() {
+    const el = document.getElementById("wheelHistory");
+    if (whistory.length===0) { el.innerHTML='<div class="history-empty">暂无记录</div>'; return; }
+    el.innerHTML = whistory.map((h,i) => `
+      <div class="history-item" style="animation-delay:${i*0.04}s;">
+        <span class="h-no">#${h.seq}</span>
+        <div class="h-icons">${h.draws.map(w=>`<img src="${ICON_W}/${w.id}.png" alt="${w.name}" title="${w.name}">`).join("")}</div>
+        <div class="h-info"><span class="h-wname">${h.draws.map(w=>w.name).join(" · ")}</span></div>
+        <span class="h-time">${formatTime(h.time)}</span>
+      </div>`).join("");
+  }
+
+  document.getElementById("btnWheelSpin").addEventListener("click", spinWheel);
+  document.getElementById("wheelCenter").addEventListener("click", spinWheel);
+  document.getElementById("btnWAll").addEventListener("click", () => { wheelPool.querySelectorAll("input").forEach(c=>c.checked=true); updateWCount(); if(!isSpinning) buildWheel(); });
+  document.getElementById("btnWNone").addEventListener("click", () => { wheelPool.querySelectorAll("input").forEach(c=>c.checked=false); updateWCount(); if(!isSpinning) buildWheel(); });
+  document.getElementById("btnWInv").addEventListener("click", () => { wheelPool.querySelectorAll("input").forEach(c=>c.checked=!c.checked); updateWCount(); if(!isSpinning) buildWheel(); });
+  let wrDebounce; window.addEventListener("resize", () => { clearTimeout(wrDebounce); wrDebounce = setTimeout(buildWheel, 200); });
+  renderWPool(); buildWheel();
+})();
+
+// ===== Tab2: 怪物抽取 =====
+(function(){
+  const mPool = document.getElementById("monsterPool"), mResult = document.getElementById("monsterResult");
+  const mCount = document.getElementById("monsterCount");
+  let mhistory=[], mhSeq=0, isMDrawing=false;
+
+  function getMSelected() {
+    return MONSTERS_DATA.filter(m => [...mPool.querySelectorAll("input:checked")].map(e=>e.value).includes(m.id));
+  }
+  function updateMCount() {
+    mCount.innerHTML = `已选 <em>${getMSelected().length}</em> / ${MONSTERS_DATA.length} 只怪物`;
+  }
+  function renderMPool() {
+    const groups = { base:"历战个体（基础版）", dlc:"历战个体（DLC追加）", at:"历战王" };
+    let h = "";
+    for (const [g,label] of Object.entries(groups)) {
+      h += `<div class="group-label">${label}</div><div class="monster-grid">`;
+      MONSTERS_DATA.filter(m=>m.group===g).forEach(m => {
+        const lbl = mLabel(m), dName = mDisplay(m);
+        h += `<div class="monster-card"><input type="checkbox" id="mm-${m.id}" value="${m.id}" checked><label for="mm-${m.id}" class="${lbl}" title="${dName}"><div class="m-icon"><img src="${ICON_M}/${m.id}.png" alt="${m.name_zh}" width="40" height="40" loading="lazy"></div><span class="m-name">${dName}</span><span class="check-mark">✓</span></label></div>`;
+      });
+      h += `</div>`;
+    }
+    mPool.innerHTML = h;
+    mPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateMCount));
+    updateMCount();
+  }
+
+  function showMResult(monster) {
+    const glow = mGlow(monster), dName = mDisplay(monster);
+    mResult.innerHTML = `<div class="dr-icon ${glow}"><img src="${ICON_M}/${monster.id}.png" alt="${monster.name_zh}"></div><div class="dr-name ${glow}">${dName}</div><div class="dr-type">${monster.type_zh}</div>`;
+  }
+
+  function renderMHistory() {
+    const el = document.getElementById("monsterHistory");
+    if (mhistory.length===0) { el.innerHTML='<div class="history-empty">暂无记录</div>'; return; }
+    el.innerHTML = mhistory.map((h,i) => {
+      const glow = mGlow(h.monster), dName = mDisplay(h.monster);
+      return `<div class="history-item ${glow==='at-glow'?'at-history':(glow==='tempered-glow'?'tempered-history':'')}" style="animation-delay:${i*0.04}s;">
+        <span class="h-no">#${h.seq}</span><div class="h-icons"><img src="${ICON_M}/${h.monster.id}.png" alt="${h.monster.name_zh}"></div>
+        <div class="h-info"><span class="h-wname">${dName}</span><span class="h-mname"> · ${h.monster.type_zh}</span></div>
+        <span class="h-time">${formatTime(h.time)}</span></div>`;
+    }).join("");
+  }
+
+  function drawMonster() {
+    if (isMDrawing) return;
+    const pool = getMSelected().filter(m=>m.id!=="guardian_arkveld");
+    if (pool.length===0) { showToast("请至少勾选一只怪物！"); return; }
+    isMDrawing = true; document.getElementById("btnMonsterDraw").disabled = true;
+    mResult.innerHTML = '<span style="color:var(--text-muted);">抽选中...</span>';
+    setTimeout(() => {
+      const winner = pool[Math.floor(Math.random()*pool.length)];
+      showMResult(winner); mhSeq++; mhistory.unshift({monster:winner,time:new Date(),seq:mhSeq}); if (mhistory.length>10) mhistory.pop();
+      renderMHistory(); isMDrawing = false; document.getElementById("btnMonsterDraw").disabled = false;
+    }, 400);
+  }
+
+  document.getElementById("btnMonsterDraw").addEventListener("click", drawMonster);
+  document.getElementById("btnMAll").addEventListener("click", () => { mPool.querySelectorAll("input").forEach(c=>c.checked=true); updateMCount(); });
+  document.getElementById("btnMNone").addEventListener("click", () => { mPool.querySelectorAll("input").forEach(c=>c.checked=false); updateMCount(); });
+  document.getElementById("btnMInv").addEventListener("click", () => { mPool.querySelectorAll("input").forEach(c=>c.checked=!c.checked); updateMCount(); });
+  renderMPool();
+})();
+
+// ===== Tab3: 英雄之证 =====
+(function(){
+  const heroSlots = document.getElementById("heroSlots"), heroPool = document.getElementById("heroPool");
+  const heroCount = document.getElementById("heroCount");
+  let hisDrawing = false, hhistory=[], hhSeq=0;
+
+  function getHSelected() {
+    const ids = [...heroPool.querySelectorAll("input:checked")].map(e=>e.value);
+    return WEAPONS_DATA.filter(w => ids.includes(w.id));
+  }
+  function updateHCount() {
+    heroCount.innerHTML = `已选 <em>${getHSelected().length}</em> / ${WEAPONS_DATA.length} 把武器`;
+  }
+
+  function renderHPool() {
+    heroPool.innerHTML = WEAPONS_DATA.map(w => `
+      <div class="wheel-item"><input type="checkbox" id="hw-${w.id}" value="${w.id}" checked><label for="hw-${w.id}"><div class="wheel-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
+    `).join("");
+    heroPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateHCount));
+    updateHCount();
+  }
+
+  function renderHeroSlots() {
+    const hc = ["slot-rey","slot-uth","slot-nu","slot-ark"];
+    heroSlots.innerHTML = [1,2,3,4].map(n => `<div class="hero-slot ${hc[n-1]}" data-slot="${n}"><span class="h-placeholder">等待抽奖</span></div>`).join("");
+  }
+
+  function weaponIconHtml(w, cls="h-icon") {
+    return `<div class="${cls}" title="${w.name}"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="56" height="56" loading="lazy"></div>`;
+  }
+  function shuffle(a) { const b=[...a]; for(let i=b.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]]; } return b; }
+  function pickRandom(a) { return a[Math.floor(Math.random()*a.length)]; }
+  function computeDraws(pool, mode) {
+    if (mode==="without") return shuffle(pool).slice(0,4);
+    return Array.from({length:4},() => pickRandom(pool));
+  }
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  async function runHeroDraw() {
+    if (hisDrawing) return;
+    const pool = getHSelected(), mode = "without";
+    if (pool.length===0) { showToast("请至少勾选一把武器！"); return; }
+    if (pool.length<4) { showToast("至少需要勾选 4 把武器！"); return; }
+    hisDrawing = true; document.getElementById("btnHeroDraw").disabled = true;
+    document.querySelectorAll("#tab-hero .hero-slot").forEach(s => { s.classList.remove("revealed","spinning"); s.innerHTML='<span class="h-placeholder">等待抽奖</span>'; });
+    const draws = computeDraws(pool, mode), slots = $$("#tab-hero .hero-slot");
+    for (let i=0;i<4;i++) {
+      const slot = slots[i]; slot.classList.add("spinning");
+      for (let s=0;s<6;s++) { const flash = pool[Math.floor(Math.random()*pool.length)]; slot.innerHTML = weaponIconHtml(flash); await sleep(85); }
+      await sleep(180); slot.classList.remove("spinning");
+      const weapon = draws[i]; slot.classList.add("revealed"); slot.innerHTML = weaponIconHtml(weapon); await sleep(380);
+    }
+    hhSeq++; hhistory.unshift({draws:[...draws],time:new Date(),seq:hhSeq}); if (hhistory.length>10) hhistory.pop();
+    renderHHistory(); hisDrawing = false; document.getElementById("btnHeroDraw").disabled = false;
+  }
+
+  function renderHHistory() {
+    const el = document.getElementById("heroHistory");
+    if (hhistory.length===0) { el.innerHTML='<div class="history-empty">暂无记录</div>'; return; }
+    el.innerHTML = hhistory.map((h,i) => `
+      <div class="history-item" style="animation-delay:${i*0.04}s;">
+        <span class="h-no">#${h.seq}</span>
+        <div class="h-icons">${h.draws.map(w=>`<img src="${ICON_W}/${w.id}.png" alt="${w.name}" title="${w.name}">`).join("")}</div>
+        <div class="h-info"><span class="h-wname">${h.draws.map(w=>w.name).join(" · ")}</span></div>
+        <span class="h-time">${formatTime(h.time)}</span>
+      </div>`).join("");
+  }
+
+  document.getElementById("btnHeroDraw").addEventListener("click", runHeroDraw);
+  document.getElementById("btnHAll").addEventListener("click", () => { heroPool.querySelectorAll("input").forEach(c=>c.checked=true); updateHCount(); });
+  document.getElementById("btnHNone").addEventListener("click", () => { heroPool.querySelectorAll("input").forEach(c=>c.checked=false); updateHCount(); });
+  document.getElementById("btnHInv").addEventListener("click", () => { heroPool.querySelectorAll("input").forEach(c=>c.checked=!c.checked); updateHCount(); });
+  renderHPool(); renderHeroSlots();
+})();
+
+// ===== Tab4: 双重抽取 =====
+(function(){
+  const dwPool = document.getElementById("dualWPool"), dmPool = document.getElementById("dualMPool");
+  const dualResult = document.getElementById("dualResult");
+  let dhistory=[], dhSeq=0, isDDrawing=false;
+
+  function getDWSelected() {
+    return WEAPONS_DATA.filter(w => [...dwPool.querySelectorAll("input:checked")].map(e=>e.value).includes(w.id));
+  }
+  function getDMSelected() {
+    return MONSTERS_DATA.filter(m => [...dmPool.querySelectorAll("input:checked")].map(e=>e.value).includes(m.id));
+  }
+  function updateDWCount() {
+    document.getElementById("dualWCount").innerHTML = `已选 <em>${getDWSelected().length}</em> / ${WEAPONS_DATA.length} 把武器`;
+  }
+  function updateDMCount() {
+    document.getElementById("dualMCount").innerHTML = `已选 <em>${getDMSelected().length}</em> / ${MONSTERS_DATA.length} 只怪物`;
+  }
+
+  function renderDWP() {
+    dwPool.innerHTML = WEAPONS_DATA.map(w => `
+      <div class="wheel-item"><input type="checkbox" id="dw-${w.id}" value="${w.id}" checked><label for="dw-${w.id}"><div class="wheel-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="36" height="36" loading="lazy"></div><span class="p-name" style="font-size:0.68rem;">${w.name}</span><span class="check-mark">✓</span></label></div>
+    `).join("");
+    dwPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateDWCount));
+    updateDWCount();
+  }
+  function renderDMP() {
+    const groups = { base:"历战个体（基础版）", dlc:"历战个体（DLC追加）", at:"历战王" };
+    let h = "";
+    for (const [g,label] of Object.entries(groups)) {
+      h += `<div class="group-label">${label}</div><div class="dual-grid">`;
+      MONSTERS_DATA.filter(m=>m.group===g).forEach(m => {
+        const lbl = mLabel(m), dName = mDisplay(m);
+        h += `<div class="monster-card"><input type="checkbox" id="dm-${m.id}" value="${m.id}" checked><label for="dm-${m.id}" class="${lbl}" title="${dName}"><div class="m-icon"><img src="${ICON_M}/${m.id}.png" alt="${m.name_zh}" width="40" height="40" loading="lazy"></div><span class="m-name">${dName}</span><span class="check-mark">✓</span></label></div>`;
+      });
+      h += `</div>`;
+    }
+    dmPool.innerHTML = h;
+    dmPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateDMCount));
+    updateDMCount();
+  }
+
+  function showDualResult(weapon, monster) {
+    const glow = mGlow(monster), dName = mDisplay(monster);
+    dualResult.innerHTML = `
+      <div class="dual-card">
+        <div class="monster-bg ${glow}"><img src="${ICON_M}/${monster.id}.png" alt="${monster.name_zh}"></div>
+        <div class="weapon-top"><img src="${ICON_W}/${weapon.id}.png" alt="${weapon.name}"><span class="w-name">${weapon.name}</span></div>
+        <div class="monster-name">${dName} · ${monster.type_zh}</div>
+      </div>`;
+  }
+
+  function renderDHistory() {
+    const el = document.getElementById("dualHistory");
+    if (dhistory.length===0) { el.innerHTML='<div class="history-empty">暂无记录</div>'; return; }
+    el.innerHTML = dhistory.map((h,i) => `
+      <div class="history-item" style="animation-delay:${i*0.04}s;">
+        <span class="h-no">#${h.seq}</span>
+        <div class="h-icons"><img src="${ICON_W}/${h.weapon.id}.png" alt="${h.weapon.name}"><span style="color:var(--text-muted);margin:0 2px;">×</span><img src="${ICON_M}/${h.monster.id}.png" alt="${h.monster.name_zh}"></div>
+        <div class="h-info"><span class="h-wname">${h.weapon.name}</span><span class="h-mname"> · ${mDisplay(h.monster)}</span></div>
+        <span class="h-time">${formatTime(h.time)}</span>
+      </div>`).join("");
+  }
+
+  function dualDraw() {
+    if (isDDrawing) return;
+    const wp = getDWSelected(), mp = getDMSelected().filter(m=>m.id!=="guardian_arkveld");
+    if (wp.length===0) { showToast("请至少勾选一把武器！"); return; }
+    if (mp.length===0) { showToast("请至少勾选一只怪物！"); return; }
+    isDDrawing = true; document.getElementById("btnDualDraw").disabled = true;
+    dualResult.innerHTML = '<span style="color:var(--text-muted);">抽选中...</span>';
+    setTimeout(() => {
+      const weapon = wp[Math.floor(Math.random()*wp.length)], monster = mp[Math.floor(Math.random()*mp.length)];
+      showDualResult(weapon, monster); dhSeq++; dhistory.unshift({weapon,monster,time:new Date(),seq:dhSeq}); if (dhistory.length>10) dhistory.pop();
+      renderDHistory(); isDDrawing = false; document.getElementById("btnDualDraw").disabled = false;
+    }, 500);
+  }
+
+  document.getElementById("btnDualDraw").addEventListener("click", dualDraw);
+  ["DW","DM"].forEach(p => {
+    document.getElementById(`btn${p}All`).addEventListener("click", () => { (p==="DW"?dwPool:dmPool).querySelectorAll("input").forEach(c=>c.checked=true); p==="DW"?updateDWCount():updateDMCount(); });
+    document.getElementById(`btn${p}None`).addEventListener("click", () => { (p==="DW"?dwPool:dmPool).querySelectorAll("input").forEach(c=>c.checked=false); p==="DW"?updateDWCount():updateDMCount(); });
+    document.getElementById(`btn${p}Inv`).addEventListener("click", () => { (p==="DW"?dwPool:dmPool).querySelectorAll("input").forEach(c=>c.checked=!c.checked); p==="DW"?updateDWCount():updateDMCount(); });
+  });
+  renderDWP(); renderDMP();
+})();
+</script>
+</body>
+</html>
