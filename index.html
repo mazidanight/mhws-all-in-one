@@ -74,7 +74,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 .wheel-slot { position: absolute; inset: 0; display: flex; justify-content: center; }
 .wheel-slot .w-icon { width: 44px; height: 44px; margin-top: 18px; display: flex; align-items: center; justify-content: center; }
 .wheel-slot .w-icon img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 1px 3px rgba(0,0,0,0.6)); }
-.wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 40% 35%,#e0c04a,var(--accent) 50%,#7a5c10); box-shadow: 0 4px 16px var(--accent-glow),inset 0 1px 2px rgba(255,255,255,0.3); z-index: 15; cursor: pointer; border: 2px solid #9a7a18; }
+.wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 60px; height: 60px; border-radius: 50%; background: radial-gradient(circle at 40% 35%,#e0c04a,var(--accent) 50%,#7a5c10); box-shadow: 0 4px 16px var(--accent-glow),inset 0 1px 2px rgba(255,255,255,0.3); z-index: 15; cursor: pointer; border: 2px solid #9a7a18; display: flex; align-items: center; justify-content: center; }
 .wheel-center:hover { transform: translate(-50%,-50%) scale(1.08); }
 .wheel-center::after { content:"GO"; font-size: 1.2rem; font-weight: 800; letter-spacing: 0.08em; color: #2a1a00; text-shadow: 0 1px 0 rgba(255,255,255,0.3); }
 .wheel-result { text-align: center; margin: 0.5rem 0; min-height: 48px; display: flex; align-items: center; justify-content: center; gap: 0.75rem; }
