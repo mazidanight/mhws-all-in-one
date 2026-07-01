@@ -18,7 +18,7 @@
 body {
   font-family: "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
   background: var(--bg-deep);
-  background-image: linear-gradient(rgba(15,20,16,0.7), rgba(15,20,16,0.7)), url("bg.jpg");
+  background-image: linear-gradient(rgba(15,20,16,0.55), rgba(15,20,16,0.55)), url("bg.jpg");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -50,7 +50,7 @@ header h1 { font-size: clamp(1.1rem,3.5vw,1.5rem); font-weight: 700; letter-spac
 .tab-panel.active { display: block; }
 
 /* ===== 共享组件 ===== */
-section { background: rgba(26,34,24,0.75); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 1rem; backdrop-filter: blur(4px); }
+section { background: rgba(26,34,24,0.5); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 1rem; backdrop-filter: blur(2px); }
 section h2 { font-size: 0.95rem; font-weight: 600; color: var(--accent); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
 section h2::before { content:""; width:4px; height:1em; background:var(--accent); border-radius:2px; }
 .pool-toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
@@ -72,7 +72,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 .pool-item input { position: absolute; opacity: 0; width: 0; height: 0; }
 .pool-item label {
   display: flex; flex-direction: column; align-items: center; gap:0.2rem;
-  padding: 0.45rem 0.2rem; background: rgba(36,48,40,0.7);
+  padding: 0.45rem 0.2rem; background: rgba(36,48,40,0.45);
   border: 2px solid var(--border); border-radius: 8px; cursor: pointer;
   font-size: 0.66rem; text-align: center; height: 110px; width: 100%;
   transition: border-color 0.2s, box-shadow 0.2s;
