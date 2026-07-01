@@ -86,10 +86,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 .pool-item input:checked + label.tempered-label .check-mark { border-color: var(--tempered-color); background: var(--tempered-color); }
 .pool-item input:checked + label.at-label { border-color: var(--at-color); box-shadow: 0 0 14px var(--at-glow); }
 .pool-item input:checked + label.at-label .check-mark { border-color: var(--at-color); background: var(--at-color); }
-/* 武器专用（无名称，紧凑） */
-.pool-item.weapon-only label { height: 64px; padding: 0.3rem 0.2rem; gap: 0.15rem; }
-.pool-item.weapon-only .p-icon { width: 36px; height: 36px; }
-@media (max-width:520px) { .pool-grid { grid-template-columns: repeat(auto-fill,minmax(68px,1fr)); } .pool-item label { height: 100px; } .pool-item .p-icon { width: 36px; height: 36px; } .pool-item.weapon-only label { height: 56px; } .pool-item.weapon-only .p-icon { width: 30px; height: 30px; } }
+@media (max-width:520px) { .pool-grid { grid-template-columns: repeat(auto-fill,minmax(68px,1fr)); } .pool-item label { height: 100px; } .pool-item .p-icon { width: 36px; height: 36px; } }
 
 /* ===== 抽选结果卡（Tab2/4共用） ===== */
 .draw-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
@@ -406,7 +403,7 @@ $$(".tab-btn").forEach(btn => {
 
   function renderWPool() {
     wheelPool.innerHTML = WEAPONS_DATA.map(w => `
-      <div class="pool-item weapon-only"><input type="checkbox" id="ww-${w.id}" value="${w.id}" checked><label for="ww-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
+      <div class="pool-item"><input type="checkbox" id="ww-${w.id}" value="${w.id}" checked><label for="ww-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
     `).join("");
     wheelPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", () => { if(!isSpinning) { currentRotation=0; wheelEl.style.transition="none"; wheelEl.style.transform="rotate(0deg)"; buildWheel(); updateWCount(); } }));
     updateWCount();
@@ -537,7 +534,7 @@ $$(".tab-btn").forEach(btn => {
 
   function renderHPool() {
     heroPool.innerHTML = WEAPONS_DATA.map(w => `
-      <div class="pool-item weapon-only"><input type="checkbox" id="hw-${w.id}" value="${w.id}" checked><label for="hw-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
+      <div class="pool-item"><input type="checkbox" id="hw-${w.id}" value="${w.id}" checked><label for="hw-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
     `).join("");
     heroPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateHCount));
     updateHCount();
@@ -617,7 +614,7 @@ $$(".tab-btn").forEach(btn => {
 
   function renderDWP() {
     dwPool.innerHTML = WEAPONS_DATA.map(w => `
-      <div class="pool-item weapon-only"><input type="checkbox" id="dw-${w.id}" value="${w.id}" checked><label for="dw-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
+      <div class="pool-item"><input type="checkbox" id="dw-${w.id}" value="${w.id}" checked><label for="dw-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
     `).join("");
     dwPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateDWCount));
     updateDWCount();
