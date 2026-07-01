@@ -63,6 +63,46 @@ section h2::before { content:""; width:4px; height:1em; background:var(--accent)
 footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--text-muted); }
 .group-label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin: 0.6rem 0 0.35rem; padding-bottom: 0.25rem; border-bottom: 1px solid var(--border); }
 
+/* ===== 统一池卡片 ===== */
+.pool-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(76px,1fr)); gap:0.5rem; }
+.pool-item { position: relative; }
+.pool-item input { position: absolute; opacity: 0; width: 0; height: 0; }
+.pool-item label {
+  display: flex; flex-direction: column; align-items: center; gap:0.2rem;
+  padding: 0.45rem 0.2rem; background: var(--bg-card);
+  border: 2px solid var(--border); border-radius: 8px; cursor: pointer;
+  font-size: 0.66rem; text-align: center; height: 110px; width: 100%;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.pool-item label:hover { border-color: #5a7358; }
+.pool-item input:checked + label { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+.pool-item .p-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.pool-item .p-icon img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.pool-item .p-name { color: var(--text); line-height: 1.2; font-size: 0.66rem; word-break: keep-all; }
+.pool-item .check-mark { width: 12px; height: 12px; border: 2px solid var(--text-muted); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: transparent; transition: all 0.2s; flex-shrink: 0; }
+.pool-item input:checked + label .check-mark { border-color: var(--accent); background: var(--accent); color: var(--bg-deep); }
+/* 历战/历战王选中色 */
+.pool-item input:checked + label.tempered-label { border-color: var(--tempered-color); box-shadow: 0 0 14px var(--tempered-glow); }
+.pool-item input:checked + label.tempered-label .check-mark { border-color: var(--tempered-color); background: var(--tempered-color); }
+.pool-item input:checked + label.at-label { border-color: var(--at-color); box-shadow: 0 0 14px var(--at-glow); }
+.pool-item input:checked + label.at-label .check-mark { border-color: var(--at-color); background: var(--at-color); }
+@media (max-width:520px) { .pool-grid { grid-template-columns: repeat(auto-fill,minmax(68px,1fr)); } .pool-item label { height: 100px; } .pool-item .p-icon { width: 36px; height: 36px; } }
+
+/* ===== 抽选结果卡（Tab2/4共用） ===== */
+.draw-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
+.draw-result { min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+.draw-result .dr-icon { width: 96px; height: 96px; animation: popIn 0.5s ease-out; }
+.draw-result .dr-icon img { width: 100%; height: 100%; object-fit: contain; }
+.draw-result .dr-name { font-size: 1.5rem; font-weight: 700; animation: fadeUp 0.4s ease-out; }
+.draw-result .dr-name.tempered-glow { color: var(--tempered-color); text-shadow: 0 0 16px var(--tempered-glow); }
+.draw-result .dr-name.at-glow { color: var(--at-color); text-shadow: 0 0 16px var(--at-glow); }
+.draw-result .dr-icon.tempered-glow { filter: drop-shadow(0 0 10px var(--tempered-glow)) drop-shadow(0 0 20px var(--tempered-glow)); }
+.draw-result .dr-icon.at-glow { filter: drop-shadow(0 0 10px var(--at-glow)) drop-shadow(0 0 20px var(--at-glow)); }
+.draw-result .dr-type { font-size: 0.9rem; color: var(--text-muted); animation: fadeUp 0.4s ease-out 0.1s both; }
+@keyframes popIn { 0%{transform:scale(0.3);opacity:0;} 60%{transform:scale(1.1);} 100%{transform:scale(1);opacity:1;} }
+@keyframes fadeUp { 0%{opacity:0;transform:translateY(12px);} 100%{opacity:1;transform:translateY(0);} }
+@keyframes fadeIn { 0%{opacity:0;transform:translateY(8px);} 100%{opacity:1;transform:translateY(0);} }
+
 /* =====【Tab1】武器转盘 ===== */
 .wheel-stage { position: relative; width: min(340px,85vw); height: min(340px,85vw); margin: 0 auto 0.5rem; }
 .wheel-pointer { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 22px solid var(--accent); filter: drop-shadow(0 0 6px var(--accent-glow)); z-index: 20; }
@@ -82,48 +122,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 .wheel-result .wr-icon img { width: 100%; height: 100%; object-fit: contain; }
 .wheel-result .wr-text { font-size: 1.1rem; font-weight: 600; color: var(--accent); animation: fadeIn 0.4s ease-out; }
 .wheel-result .wr-name { font-size: 1.4rem; text-shadow: 0 0 12px var(--accent-glow); }
-@keyframes popIn { 0%{transform:scale(0.3);opacity:0;} 60%{transform:scale(1.1);} 100%{transform:scale(1);opacity:1;} }
-@keyframes fadeIn { 0%{opacity:0;transform:translateY(8px);} 100%{opacity:1;transform:translateY(0);} }
-.wheel-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(72px,1fr)); gap:0.6rem; }
-.wheel-item { position: relative; }
-.wheel-item input { position: absolute; opacity: 0; width: 0; height: 0; }
-.wheel-item label { display: flex; flex-direction: column; align-items: center; gap: 0.35rem; padding: 0.5rem 0.35rem; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
-.wheel-item label:hover { border-color: #5a7358; }
-.wheel-item input:checked + label { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
-.wheel-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
-.wheel-icon img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-.wheel-item .check-mark { width: 14px; height: 14px; border: 2px solid var(--text-muted); border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: transparent; transition: all 0.2s; }
-.wheel-item input:checked + label .check-mark { border-color: var(--accent); background: var(--accent); color: var(--bg-deep); }
-@media (max-width:520px) { .wheel-grid { grid-template-columns: repeat(auto-fill,minmax(60px,1fr)); } .wheel-slot .w-icon { width: 32px; height: 32px; margin-top: 14px; } .wheel-center { width: 48px; height: 48px; } }
-
-/* =====【Tab2】怪物抽取 ===== */
-.draw-card { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
-.draw-result { min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.75rem; }
-.draw-result .dr-icon { width: 96px; height: 96px; animation: popIn 0.5s ease-out; }
-.draw-result .dr-icon img { width: 100%; height: 100%; object-fit: contain; }
-.draw-result .dr-name { font-size: 1.6rem; font-weight: 700; animation: fadeUp 0.4s ease-out; }
-.draw-result .dr-name.tempered-glow { color: var(--tempered-color); text-shadow: 0 0 16px var(--tempered-glow); }
-.draw-result .dr-name.at-glow { color: var(--at-color); text-shadow: 0 0 16px var(--at-glow); }
-.draw-result .dr-icon.tempered-glow { filter: drop-shadow(0 0 10px var(--tempered-glow)) drop-shadow(0 0 20px var(--tempered-glow)); }
-.draw-result .dr-icon.at-glow { filter: drop-shadow(0 0 10px var(--at-glow)) drop-shadow(0 0 20px var(--at-glow)); }
-.draw-result .dr-type { font-size: 0.9rem; color: var(--text-muted); animation: fadeUp 0.4s ease-out 0.1s both; }
-@keyframes fadeUp { 0%{opacity:0;transform:translateY(12px);} 100%{opacity:1;transform:translateY(0);} }
-.monster-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(84px,1fr)); gap: 0.5rem; }
-.monster-card { position: relative; }
-.monster-card input { position: absolute; opacity: 0; width: 0; height: 0; }
-.monster-card label { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.5rem 0.25rem; background: var(--bg-card); border: 2px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.68rem; text-align: center; height: 110px; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; }
-.monster-card label:hover { border-color: #5a7358; }
-.monster-card input:checked + label { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
-.monster-card input:checked + label.tempered-label { border-color: var(--tempered-color); box-shadow: 0 0 14px var(--tempered-glow); }
-.monster-card input:checked + label.at-label { border-color: var(--at-color); box-shadow: 0 0 14px var(--at-glow); }
-.monster-card .m-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.monster-card .m-icon img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
-.monster-card .m-name { color: var(--text); line-height: 1.2; font-size: 0.68rem; word-break: keep-all; }
-.monster-card .check-mark { width: 12px; height: 12px; border: 2px solid var(--text-muted); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: transparent; transition: all 0.2s; }
-.monster-card input:checked + label .check-mark { border-color: var(--accent); background: var(--accent); color: var(--bg-deep); }
-.monster-card input:checked + label.tempered-label .check-mark { border-color: var(--tempered-color); background: var(--tempered-color); }
-.monster-card input:checked + label.at-label .check-mark { border-color: var(--at-color); background: var(--at-color); }
-@media (max-width:520px) { .monster-grid { grid-template-columns: repeat(auto-fill,minmax(70px,1fr)); } }
+@media (max-width:520px) { .wheel-slot .w-icon { width: 32px; height: 32px; margin-top: 14px; } .wheel-center { width: 48px; height: 48px; } }
 
 /* =====【Tab3】英雄之证 ===== */
 .hero-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.6rem; }
@@ -143,8 +142,8 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 .hero-slot .h-placeholder { font-size: 0.8rem; color: var(--text-muted); }
 .hero-slot.spinning .h-icon { animation: hPulse 0.4s ease-in-out infinite; }
 @keyframes hPulse { 0%,100%{opacity:0.4;transform:scale(0.92);} 50%{opacity:1;transform:scale(1.05);} }
-.hero-grid-w { display: grid; grid-template-columns: repeat(auto-fill,minmax(72px,1fr)); gap: 0.6rem; }
-@media (max-width:520px) { .hero-grid-w { grid-template-columns: repeat(auto-fill,minmax(60px,1fr)); } }
+.pool-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(72px,1fr)); gap: 0.6rem; }
+@media (max-width:520px) { .pool-grid { grid-template-columns: repeat(auto-fill,minmax(60px,1fr)); } }
 
 /* =====【Tab4】双重抽取 ===== */
 .dual-result { min-height: 180px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
@@ -157,7 +156,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 .dual-card .weapon-top img { width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
 .dual-card .weapon-top .w-name { font-size: 1.2rem; font-weight: 700; color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
 .dual-card .monster-name { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; z-index: 2; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
-.dual-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(72px,1fr)); gap: 0.5rem; }
+.pool-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(72px,1fr)); gap: 0.5rem; }
 
 /* ===== 历史记录（共用） ===== */
 .history-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 40px; }
@@ -206,7 +205,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
       <div class="pool-toolbar">
         <button id="btnWAll">全选</button><button id="btnWNone">全不选</button><button id="btnWInv">反选</button>
       </div>
-      <div class="wheel-grid" id="wheelPool"></div>
+      <div class="pool-grid" id="wheelPool"></div>
     </section>
     <section><h2>历史记录</h2><div class="history-list" id="wheelHistory"><div class="history-empty">暂无记录</div></div></section>
   </div>
@@ -242,7 +241,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
       <div class="pool-toolbar">
         <button id="btnHAll">全选</button><button id="btnHNone">全不选</button><button id="btnHInv">反选</button>
       </div>
-      <div class="hero-grid-w" id="heroPool"></div>
+      <div class="pool-grid" id="heroPool"></div>
     </section>
     <section><h2>历史记录</h2><div class="history-list" id="heroHistory"><div class="history-empty">暂无记录</div></div></section>
   </div>
@@ -257,7 +256,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
       <div class="pool-toolbar">
         <button id="btnDWAll">全选</button><button id="btnDWNone">全不选</button><button id="btnDWInv">反选</button>
       </div>
-      <div class="dual-grid" id="dualWPool"></div>
+      <div class="pool-grid" id="dualWPool"></div>
       <div class="pool-count" id="dualWCount">已选 <em>14</em> / 14 把武器</div>
     </section>
     <section><h2>怪物池</h2>
@@ -404,7 +403,7 @@ $$(".tab-btn").forEach(btn => {
 
   function renderWPool() {
     wheelPool.innerHTML = WEAPONS_DATA.map(w => `
-      <div class="wheel-item"><input type="checkbox" id="ww-${w.id}" value="${w.id}" checked><label for="ww-${w.id}"><div class="wheel-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
+      <div class="pool-item"><input type="checkbox" id="ww-${w.id}" value="${w.id}" checked><label for="ww-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
     `).join("");
     wheelPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", () => { if(!isSpinning) { currentRotation=0; wheelEl.style.transition="none"; wheelEl.style.transform="rotate(0deg)"; buildWheel(); updateWCount(); } }));
     updateWCount();
@@ -470,10 +469,10 @@ $$(".tab-btn").forEach(btn => {
     const groups = { base:"历战个体（基础版）", dlc:"历战个体（DLC追加）", at:"历战王" };
     let h = "";
     for (const [g,label] of Object.entries(groups)) {
-      h += `<div class="group-label">${label}</div><div class="monster-grid">`;
+      h += `<div class="group-label">${label}</div><div class="pool-grid">`;
       MONSTERS_DATA.filter(m=>m.group===g).forEach(m => {
         const lbl = mLabel(m), dName = mDisplay(m);
-        h += `<div class="monster-card"><input type="checkbox" id="mm-${m.id}" value="${m.id}" checked><label for="mm-${m.id}" class="${lbl}" title="${dName}"><div class="m-icon"><img src="${ICON_M}/${m.id}.png" alt="${m.name_zh}" width="40" height="40" loading="lazy"></div><span class="m-name">${dName}</span><span class="check-mark">✓</span></label></div>`;
+        h += `<div class="pool-item"><input type="checkbox" id="mm-${m.id}" value="${m.id}" checked><label for="mm-${m.id}" class="${lbl}" title="${dName}"><div class="p-icon"><img src="${ICON_M}/${m.id}.png" alt="${m.name_zh}" width="40" height="40" loading="lazy"></div><span class="p-name">${dName}</span><span class="check-mark">✓</span></label></div>`;
       });
       h += `</div>`;
     }
@@ -535,7 +534,7 @@ $$(".tab-btn").forEach(btn => {
 
   function renderHPool() {
     heroPool.innerHTML = WEAPONS_DATA.map(w => `
-      <div class="wheel-item"><input type="checkbox" id="hw-${w.id}" value="${w.id}" checked><label for="hw-${w.id}"><div class="wheel-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
+      <div class="pool-item"><input type="checkbox" id="hw-${w.id}" value="${w.id}" checked><label for="hw-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="check-mark">✓</span></label></div>
     `).join("");
     heroPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateHCount));
     updateHCount();
@@ -615,7 +614,7 @@ $$(".tab-btn").forEach(btn => {
 
   function renderDWP() {
     dwPool.innerHTML = WEAPONS_DATA.map(w => `
-      <div class="wheel-item"><input type="checkbox" id="dw-${w.id}" value="${w.id}" checked><label for="dw-${w.id}"><div class="wheel-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="36" height="36" loading="lazy"></div><span class="p-name" style="font-size:0.68rem;">${w.name}</span><span class="check-mark">✓</span></label></div>
+      <div class="pool-item"><input type="checkbox" id="dw-${w.id}" value="${w.id}" checked><label for="dw-${w.id}"><div class="p-icon"><img src="${ICON_W}/${w.id}.png" alt="${w.name}" width="40" height="40" loading="lazy"></div><span class="p-name">${w.name}</span><span class="check-mark">✓</span></label></div>
     `).join("");
     dwPool.querySelectorAll("input").forEach(cb => cb.addEventListener("change", updateDWCount));
     updateDWCount();
@@ -624,10 +623,10 @@ $$(".tab-btn").forEach(btn => {
     const groups = { base:"历战个体（基础版）", dlc:"历战个体（DLC追加）", at:"历战王" };
     let h = "";
     for (const [g,label] of Object.entries(groups)) {
-      h += `<div class="group-label">${label}</div><div class="dual-grid">`;
+      h += `<div class="group-label">${label}</div><div class="pool-grid">`;
       MONSTERS_DATA.filter(m=>m.group===g).forEach(m => {
         const lbl = mLabel(m), dName = mDisplay(m);
-        h += `<div class="monster-card"><input type="checkbox" id="dm-${m.id}" value="${m.id}" checked><label for="dm-${m.id}" class="${lbl}" title="${dName}"><div class="m-icon"><img src="${ICON_M}/${m.id}.png" alt="${m.name_zh}" width="40" height="40" loading="lazy"></div><span class="m-name">${dName}</span><span class="check-mark">✓</span></label></div>`;
+        h += `<div class="pool-item"><input type="checkbox" id="dm-${m.id}" value="${m.id}" checked><label for="dm-${m.id}" class="${lbl}" title="${dName}"><div class="p-icon"><img src="${ICON_M}/${m.id}.png" alt="${m.name_zh}" width="40" height="40" loading="lazy"></div><span class="p-name">${dName}</span><span class="check-mark">✓</span></label></div>`;
       });
       h += `</div>`;
     }
