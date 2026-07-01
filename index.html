@@ -31,7 +31,7 @@ header h1 { font-size: clamp(1.1rem,3.5vw,1.5rem); font-weight: 700; letter-spac
 /* ===== Tab 导航 ===== */
 .tab-nav {
   display: flex; gap: 2px; margin-bottom: 1rem;
-  background: rgba(36,48,40,0.7); border-radius: 10px; overflow: hidden;
+  background: rgba(36,48,40,0.5); border-radius: 10px; overflow: hidden;
   border: 1px solid var(--border);
 }
 .tab-btn {
@@ -112,7 +112,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 .wheel-pointer { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 22px solid var(--accent); filter: drop-shadow(0 0 6px var(--accent-glow)); z-index: 20; }
 .wheel-pointer::after { content:""; position: absolute; top: -28px; left: -6px; width: 12px; height: 8px; background: var(--accent); border-radius: 3px 3px 0 0; }
 .wheel-outer { width: 100%; height: 100%; border-radius: 50%; padding: 12px; background: radial-gradient(circle,var(--border) 60%,#2a352c 100%); box-shadow: 0 0 30px rgba(0,0,0,0.5), 0 0 60px var(--accent-glow); }
-.wheel-inner { width: 100%; height: 100%; border-radius: 50%; background: rgba(28,36,26,0.75); backdrop-filter: blur(4px); position: relative; overflow: hidden; }
+.wheel-inner { width: 100%; height: 100%; border-radius: 50%; background: rgba(28,36,26,0.5); backdrop-filter: blur(2px); position: relative; overflow: hidden; }
 .wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; transition: transform 4.5s cubic-bezier(0.12,0.8,0.3,1); }
 .wheel-layer { position: absolute; inset: 0; border-radius: 50%; }
 .wheel-slot { position: absolute; inset: 0; display: flex; justify-content: center; }
@@ -131,7 +131,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 /* =====【Tab3】英雄之证 ===== */
 .hero-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 0.6rem; }
 @media (max-width:520px) { .hero-grid { grid-template-columns: repeat(2,1fr); } }
-.hero-slot { border: 2px solid var(--border); border-radius: 10px; padding: 0.75rem 0.5rem; text-align: center; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-card); position: relative; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
+.hero-slot { border: 2px solid var(--border); border-radius: 10px; padding: 0.75rem 0.5rem; text-align: center; min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(36,48,40,0.45); position: relative; overflow: hidden; transition: border-color 0.3s, box-shadow 0.3s; }
 .hero-slot::before { content:""; position: absolute; inset: 0; background-size: 80px 80px; background-repeat: no-repeat; background-position: center; opacity: 0.4; filter: drop-shadow(0 0 8px var(--at-glow)); z-index: 0; transition: opacity 0.3s; }
 .hero-slot.slot-rey::before { background-image: url("icons/bg_rey_dau.png"); }
 .hero-slot.slot-uth::before { background-image: url("icons/bg_uth_duna.png"); }
@@ -151,7 +151,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 
 /* =====【Tab4】双重抽取 ===== */
 .dual-result { min-height: 180px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
-.dual-card { position: relative; width: 200px; height: 200px; border: 2px solid var(--border); border-radius: 16px; background: rgba(36,48,40,0.65); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.dual-card { position: relative; width: 200px; height: 200px; border: 2px solid var(--border); border-radius: 16px; background: rgba(36,48,40,0.4); overflow: hidden; display: flex; align-items: center; justify-content: center; }
 .dual-card .monster-bg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; opacity: 0.4; z-index: 0; }
 .dual-card .monster-bg img { width: 140px; height: 140px; object-fit: contain; }
 .dual-card .monster-bg.at-glow { filter: drop-shadow(0 0 12px var(--at-glow)); }
@@ -164,7 +164,7 @@ footer { text-align: center; margin-top: 1rem; font-size: 0.75rem; color: var(--
 
 /* ===== 历史记录（共用） ===== */
 .history-list { display: flex; flex-direction: column; gap: 0.5rem; min-height: 40px; }
-.history-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.75rem; background: rgba(36,48,40,0.65); border: 1px solid var(--border); border-radius: 8px; animation: histIn 0.3s ease-out; }
+.history-item { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.75rem; background: rgba(36,48,40,0.4); border: 1px solid var(--border); border-radius: 8px; animation: histIn 0.3s ease-out; }
 .history-item.at-history { border-color: rgba(232,93,63,0.3); box-shadow: 0 0 8px rgba(232,93,63,0.15); }
 .history-item.tempered-history { border-color: rgba(168,85,247,0.3); box-shadow: 0 0 8px rgba(168,85,247,0.15); }
 @keyframes histIn { 0%{opacity:0;transform:translateX(-20px);} 100%{opacity:1;transform:translateX(0);} }
