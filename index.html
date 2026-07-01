@@ -385,11 +385,14 @@ $$(".tab-btn").forEach(btn => {
   function buildWheel() {
     const weapons = getWSelected(); const count = weapons.length; const segAngle = 360/count;
     if (count === 0) { wheelEl.style.background = "var(--bg-card)"; wheelLayer.innerHTML = ""; return; }
+    const gap = Math.max(0.6, segAngle*0.03);
     const stops = [];
     for (let i = 0; i < count; i++) {
       const c = i%2===0 ? "var(--bg-card)" : "var(--bg-panel)";
-      const s = i*360/count, e = (i===count-1)?360:(i+1)*360/count;
-      stops.push(`${c} ${s.toFixed(4)}deg ${e.toFixed(4)}deg`);
+      const s = i*360/count, ce = (i===count-1)?360-gap:(i+1)*360/count-gap;
+      const ge = (i===count-1)?360:(i+1)*360/count;
+      stops.push(`${c} ${s.toFixed(4)}deg ${ce.toFixed(4)}deg`);
+      stops.push(`rgba(0,0,0,0.45) ${ce.toFixed(4)}deg ${ge.toFixed(4)}deg`);
     }
     wheelEl.style.background = `conic-gradient(${stops.join(",")})`;
     currentRotation = 0; wheelEl.style.transition = "none"; wheelEl.style.transform = "rotate(0deg)";
